@@ -17,7 +17,7 @@ This project is designed to open a `.wav` file, extract all metadata and audio d
 After building the project, you can run the executable with a `.wav` file as input:
 
 ``` bash
-./dissonance <path_to_wav_file>
+./dissonance.pre-alpha <path_to_wav_file>
 ```
 
 ## Files
