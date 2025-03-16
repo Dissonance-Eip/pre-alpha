@@ -12,7 +12,6 @@ int main(int argc, char* argv[]) {
     }
 
     std::string filename = argv[1];
-    std::cout << "Opening file: " << filename << std::endl;
     Parser wav(filename);
     if (wav.isValid()) {
         wav.printMetadata();
