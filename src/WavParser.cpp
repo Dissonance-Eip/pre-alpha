@@ -7,7 +7,7 @@
 
 Parser::Parser(const std::string& filename) {
     std::cout << "Opening file: " << filename << std::endl;
-    if (std::ifstream file("dism.wav", std::ios::binary); file) {
+    if (std::ifstream file(filename, std::ios::binary); file) {
         std::cout << "File opened successfully" << std::endl;
         // parse file header then data
         valid = true;
