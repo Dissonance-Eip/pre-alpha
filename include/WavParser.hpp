@@ -5,24 +5,9 @@
 #ifndef WAVPARSER_H
 #define WAVPARSER_H
 
+#include <memory>
 #include <string>
-#include <cstdint>
-
-struct WavHeader {
-    char riff[4];        // "RIFF"
-    uint32_t chunkSize;  // Size of the entire file in bytes minus 8 bytes
-    char wave[4];        // "WAVE"
-    char fmt[4];         // "fmt "
-    uint32_t subchunk1Size; // Size of the fmt chunk
-    uint16_t audioFormat;   // Audio format (1 for PCM)
-    uint16_t numChannels;   // Number of channels
-    uint32_t sampleRate;    // Sample rate
-    uint32_t byteRate;      // Byte rate
-    uint16_t blockAlign;    // Block align
-    uint16_t bitsPerSample; // Bits per sample
-    char data[4];           // "data"
-    uint32_t subchunk2Size; // Size of the data chunk
-};
+#include "WavHeader.hpp"
 
 class Parser {
 public:
@@ -32,7 +17,7 @@ public:
     void printAudioData() const;
 
 private:
-    WavHeader header;
+    std::shared_ptr<WavHeader> header;
     bool valid = false;
 };
 
