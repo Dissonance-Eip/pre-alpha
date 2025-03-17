@@ -8,6 +8,7 @@ include_directories(include)
 set(SOURCES
     src/main.cpp
     src/WavParser.cpp
+        include/WavHeader.hpp
 )
 
 add_executable(dissonance.pre-alpha ${SOURCES})

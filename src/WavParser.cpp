@@ -1,27 +1,35 @@
 //
 // Created by noe on 16/03/2025.
 //
+
 #include "WavParser.hpp"
 #include <iostream>
 #include <fstream>
 
-Parser::Parser(const std::string& filename) {
+Parser::Parser(const std::string& filename) : header(std::make_shared<WavHeader>()) {
     std::cout << "Opening file: " << filename << std::endl;
-    if (std::ifstream file(filename, std::ios::binary); file) {
-        std::cout << "File opened successfully" << std::endl;
-        // parse file header then data
-        valid = true;
-    } else {
-        valid = false;
+    std::ifstream file(filename, std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("Failed to open file: " + filename);
     }
-}
-
-bool Parser::isValid() const {
-    return valid;
+    std::cout << "File opened successfully" << std::endl;
+    header->readFromFile(file);
+    valid = true;
 }
 
 void Parser::printMetadata() const {
-    // print metadata information
+    if (valid) {
+        std::cout << "Chunk size: " << header->getChunkSize() << std::endl;
+        std::cout << "Audio format: " << header->getAudioFormat() << std::endl;
+        std::cout << "Number of channels: " << header->getNumChannels() << std::endl;
+        std::cout << "Sample rate: " << header->getSampleRate() << std::endl;
+        std::cout << "Byte rate: " << header->getByteRate() << std::endl;
+        std::cout << "Block align: " << header->getBlockAlign() << std::endl;
+        std::cout << "Bits per sample: " << header->getBitsPerSample() << std::endl;
+        std::cout << "Data size: " << header->getSubchunk2Size() << std::endl;
+    } else {
+        std::cerr << "WAV file invalid.\n";
+    }
 }
 
 void Parser::printAudioData() const {
