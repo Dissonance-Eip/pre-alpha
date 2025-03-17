@@ -3,22 +3,21 @@
 //
 
 #include <iostream>
+#include <memory>
 #include "WavParser.hpp"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
     if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <path_to_wav_file>" << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <path_to_wav_file>\n";
         return 1;
     }
 
-    std::string filename = argv[1];
-    std::cout << "Opening file: " << filename << std::endl;
-    Parser wav(filename);
-    if (wav.isValid()) {
-        wav.printMetadata();
-        wav.printAudioData();
+    std::shared_ptr<Parser> parser = std::make_shared<Parser>(argv[1]);
+    if (parser->isValid()) {
+        parser->printMetadata();
+        parser->printAudioData();
     } else {
-        std::cerr << "Failed to open WAV file." << std::endl;
+        std::cerr << "WAV file invalid.\n";
     }
     return 0;
 }
