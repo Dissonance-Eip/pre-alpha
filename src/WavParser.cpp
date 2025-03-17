@@ -9,21 +9,12 @@
 Parser::Parser(const std::string& filename) : header(std::make_shared<WavHeader>()) {
     std::cout << "Opening file: " << filename << std::endl;
     std::ifstream file(filename, std::ios::binary);
-    if (file) {
-        std::cout << "File opened successfully" << std::endl;
-        file.read(reinterpret_cast<char*>(header.get()), sizeof(WavHeader));
-        if (file.gcount() == sizeof(WavHeader)) {
-            valid = true;
-        } else {
-            valid = false;
-        }
-    } else {
-        valid = false;
+    if (!file) {
+        throw std::runtime_error("Failed to open file: " + filename);
     }
-}
-
-bool Parser::isValid() const {
-    return valid;
+    std::cout << "File opened successfully" << std::endl;
+    header->readFromFile(file);
+    valid = true;
 }
 
 void Parser::printMetadata() const {

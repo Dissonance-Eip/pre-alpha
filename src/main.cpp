@@ -4,20 +4,25 @@
 
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include "WavParser.hpp"
 
 int main(int argc, char** argv) {
-    if (argc < 2) {
-        std::cerr << "Usage: " << argv[0] << " <path_to_wav_file>\n";
-        return 1;
-    }
+    try {
+        if (argc < 2) {
+            throw std::runtime_error("Usage: " + std::string(argv[0]) + " <path_to_wav_file>");
+        }
 
-    std::shared_ptr<Parser> parser = std::make_shared<Parser>(argv[1]);
-    if (parser->isValid()) {
-        parser->printMetadata();
-        parser->printAudioData();
-    } else {
-        std::cerr << "WAV file invalid.\n";
+        std::shared_ptr<Parser> parser = std::make_shared<Parser>(argv[1]);
+        if (parser->isValid()) {
+            parser->printMetadata();
+            parser->printAudioData();
+        } else {
+            throw std::runtime_error("WAV file invalid.");
+        }
+    } catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        return EXIT_FAILURE;
     }
-    return 0;
+    return EXIT_SUCCESS;
 }

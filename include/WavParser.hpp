@@ -11,8 +11,8 @@
 
 class Parser {
 public:
-    Parser(const std::string& filename);
-    bool isValid() const;
+    explicit Parser(const std::string& filename);
+    [[nodiscard]] bool isValid() const { return valid; }
     void printMetadata() const;
     void printAudioData() const;
 
