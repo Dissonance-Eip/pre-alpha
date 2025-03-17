@@ -6,7 +6,7 @@
 #include <memory>
 #include "WavParser.hpp"
 
-int main(int argc, char* argv[]) {
+int main(int argc, char** argv) {
     if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " <path_to_wav_file>\n";
         return 1;
