@@ -19,6 +19,7 @@ public:
 private:
     std::shared_ptr<WavHeader> header;
     bool valid = false;
+    std::string filename;
 };
 
 #endif // WAVPARSER_H

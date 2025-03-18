@@ -13,8 +13,7 @@ int main(int argc, char** argv) {
             throw std::runtime_error("Usage: " + std::string(argv[0]) + " <path_to_wav_file>");
         }
 
-        std::shared_ptr<Parser> parser = std::make_shared<Parser>(argv[1]);
-        if (parser->isValid()) {
+        if (const auto parser = std::make_shared<Parser>(argv[1]); parser->isValid()) {
             parser->printMetadata();
             parser->printAudioData();
         } else {
