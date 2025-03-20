@@ -25,7 +25,7 @@ public:
     void printOtherChunks() const;
     void printWaveform() const;
     void printListChunk(const std::vector<char>& value) const;
-    void printGenericChunk(const std::string& key, const std::vector<char>& value) const;
+    static void printGenericChunk(const std::string& key, const std::vector<char>& value) ;
 
 private:
     std::shared_ptr<Parser> data;
@@ -38,6 +38,13 @@ private:
         "\033[38;5;46m",  // Green
         "\033[0m" // Reset
     };
+    mutable std::string title;
+    mutable std::string date;
+    mutable std::string name;
+    mutable std::string description;
+    mutable std::string software;
+    mutable std::string genre;
+    mutable std::string copyright;
 };
 
 #endif // WAVGUI_H
