@@ -15,6 +15,8 @@ public:
     [[nodiscard]] bool isValid() const { return valid; }
     void printMetadata() const;
     void printAudioData() const;
+    void printOtherChunks() const;
+    void printWaveform() const;
 
 private:
     std::shared_ptr<WavHeader> header;
