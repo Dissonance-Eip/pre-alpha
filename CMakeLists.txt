@@ -7,8 +7,10 @@ include_directories(include)
 
 set(SOURCES
     src/main.cpp
-        src/WavGui.cpp
-        include/WavParser.hpp
+    src/WavGui.cpp
+    include/WavParser.hpp
 )
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(dissonance.pre-alpha ${SOURCES})
