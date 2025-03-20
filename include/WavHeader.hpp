@@ -1,5 +1,5 @@
 #ifndef WAVHEADER_H
-#define WAVHEADER_H
+    #define WAVHEADER_H
 
 #include <cstdint>
 #include <fstream>
@@ -44,15 +44,15 @@ public:
                     if (!file.read(reinterpret_cast<char*>(tempData.data()), subchunk2Size)) {
                         throw std::runtime_error("Failed to read audio data");
                     }
-                    audioData.clear();
-                    audioData.reserve(tempData.size());
-                    for (auto& sample : tempData) {
-                        audioData.push_back(sample);
-                    }
+                    audioData.assign(tempData.begin(), tempData.end());
                 }
                 break;
             }
-            file.seekg(chunkSize, std::ios::cur);
+            std::vector<char> chunkData(chunkSize);
+            if (!file.read(chunkData.data(), chunkSize)) {
+                throw std::runtime_error("Failed to read chunk data");
+            }
+            otherChunks[data] = std::move(chunkData);
         }
     }
 
@@ -75,7 +75,7 @@ public:
     [[nodiscard]] const std::unordered_map<std::string, std::vector<char>>& getOtherChunks() const { return otherChunks; }
 
 private:
-    static void readString(std::ifstream& file, std::string& field, size_t size) {
+    static void readString(std::ifstream& file, std::string& field, const size_t size) {
         field.resize(size);
         if (!file.read(&field[0], static_cast<std::streamsize>(size))) {
             throw std::runtime_error("Failed to read string field");
