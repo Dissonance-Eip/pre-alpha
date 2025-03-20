@@ -5,7 +5,7 @@
 #include <iostream>
 #include <memory>
 #include <stdexcept>
-#include "WavParser.hpp"
+#include "WavGUI.hpp"
 
 int main(int argc, char** argv) {
     try {
@@ -13,8 +13,9 @@ int main(int argc, char** argv) {
             throw std::runtime_error("Usage: " + std::string(argv[0]) + " <path_to_wav_file>");
         }
 
-        if (const auto parser = std::make_shared<Parser>(argv[1]); parser->isValid()) {
+        if (const auto parser = std::make_shared<GUI>(argv[1]); parser->isValid()) {
             parser->printMetadata();
+            parser->printOtherChunks();
             parser->printWaveform();
         } else {
             throw std::runtime_error("WAV file invalid.");
