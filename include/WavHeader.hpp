@@ -48,14 +48,21 @@ public:
                 }
                 break;
             }
-            std::vector<char> chunkData(chunkSize);
-            if (!file.read(chunkData.data(), chunkSize)) {
-                throw std::runtime_error("Failed to read chunk data");
+            if (data == "LIST") {
+                std::vector<char> chunkData(chunkSize);
+                if (!file.read(chunkData.data(), chunkSize)) {
+                    throw std::runtime_error("Failed to read LIST chunk data");
+                }
+                otherChunks[data] = std::move(chunkData);
+            } else {
+                std::vector<char> chunkData(chunkSize);
+                if (!file.read(chunkData.data(), chunkSize)) {
+                    throw std::runtime_error("Failed to read chunk data");
+                }
+                otherChunks[data] = std::move(chunkData);
             }
-            otherChunks[data] = std::move(chunkData);
         }
     }
-
 
     // Getters
     [[nodiscard]] std::string getRiff() const { return riff; }

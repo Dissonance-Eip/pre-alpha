@@ -23,15 +23,19 @@ public:
     void printAudioData() const;
     void printOtherChunks() const;
     void printWaveform() const;
+    void printListChunk(const std::vector<char>& value) const;
+    void printGenericChunk(const std::string& key, const std::vector<char>& value) const;
 
 private:
     std::shared_ptr<WavHeader> header;
     bool valid = false;
     std::string filename;
-    std::array<std::string, 3> colors = {
+    std::array<std::string, 5> colors = {
         "\033[38;5;214m", // Orange
         "\033[38;5;226m", // Yellow
-        "\033[38;5;196m"  // Red
+        "\033[38;5;196m",  // Red
+        "\033[38;5;46m",  // Green
+        "\033[0m" // Reset
     };
 };
 

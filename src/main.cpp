@@ -15,6 +15,7 @@ int main(int argc, char** argv) {
 
         if (const auto parser = std::make_shared<Parser>(argv[1]); parser->isValid()) {
             parser->printMetadata();
+            parser->printOtherChunks();
             parser->printWaveform();
         } else {
             throw std::runtime_error("WAV file invalid.");
