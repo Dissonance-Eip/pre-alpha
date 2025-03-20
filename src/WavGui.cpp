@@ -106,58 +106,58 @@ void GUI::printOtherChunks() const {
     }
 }
 
+#include <iomanip>
+#include <sstream>
+
 void GUI::printListChunk(const std::vector<char>& value) const {
     std::cout << std::endl << colors[3] << "MetaData:" << colors[4] << std::endl;
-    std::string title;
-    std::string url;
-    std::string date;
-    std::string name;
-    std::string description;
-    std::string software;
+    std::unordered_map<std::string, std::string*> chunkMap = {
+        {"INAM", &title},
+        {"IART", &name},
+        {"ICMT", &description},
+        {"ICRD", &date},
+        {"ISFT", &software},
+        {"IGNR", &genre},
+        {"ICOP", &copyright}
+    };
 
     size_t i = 0;
     while (i < value.size()) {
-        if (i + 4 <= value.size() && std::string(value.begin() + i, value.begin() + i + 4) == "INFO") {
-            i += 8; // Skip "INFO" and size
-            title = std::string(value.begin() + i, value.begin() + i + 4);
-            i += 4;
-        } else if (i + 4 <= value.size() && std::string(value.begin() + i, value.begin() + i + 4) == "IART") {
-            i += 8; // Skip "IART" and size
-            title = std::string(value.begin() + i, value.begin() + i + 4);
-            i += 4;
-        } else if (i + 4 <= value.size() && std::string(value.begin() + i, value.begin() + i + 4) == "ICMT") {
-            i += 8; // Skip "ICMT" and size
-            url = std::string(value.begin() + i, value.begin() + i + 44);
-            i += 44;
-        } else if (i + 4 <= value.size() && std::string(value.begin() + i, value.begin() + i + 4) == "ICRD") {
-            i += 8; // Skip "ICRD" and size
-            date = std::string(value.begin() + i, value.begin() + i + 9);
-            i += 9;
-        } else if (i + 4 <= value.size() && std::string(value.begin() + i, value.begin() + i + 4) == "INAM") {
-            i += 8; // Skip "INAM" and size
-            name = std::string(value.begin() + i, value.begin() + i + 44);
-            i += 44;
-        } else if (i + 4 <= value.size() && std::string(value.begin() + i, value.begin() + i + 4) == "ISFT") {
-            i += 8; // Skip "ISFT" and size
-            software = std::string(value.begin() + i, value.begin() + i + 14);
-            i += 14;
+        if (std::string chunkId(value.begin() + i, value.begin() + i + 4); chunkMap.find(chunkId) != chunkMap.end()) {
+            i += 4; // Skip chunk ID
+            const uint32_t chunkSize = *reinterpret_cast<const uint32_t*>(&value[i]);
+            i += 4; // Skip chunk size
+            const auto& field = chunkMap[chunkId];
+            *field = std::string(value.begin() + i, value.begin() + i + chunkSize);
+            i += chunkSize;
+
+            field->erase(std::find_if(field->rbegin(), field->rend(), [](const unsigned char ch) {
+                return !std::isspace(ch) && ch != '\0';
+            }).base(), field->end());
         } else {
             ++i;
         }
     }
 
-    std::cout << colors[0] << "Title: "<< colors[1] << title << colors[4] << std::endl;
-    std::cout << colors[0] << "URL: " << colors[1] << url << colors[4] << std::endl;
+    if (!date.empty() && date.size() == 8) {
+        std::ostringstream formattedDate;
+        formattedDate << date.substr(0, 4) << "-" << date.substr(4, 2) << "-" << date.substr(6, 2);
+        date = formattedDate.str();
+    }
+
+    std::cout << colors[0] << "Title: " << colors[1] << title << colors[4] << std::endl;
     std::cout << colors[0] << "Date: " << colors[1] << date << colors[4] << std::endl;
     std::cout << colors[0] << "Name: " << colors[1] << name << colors[4] << std::endl;
     std::cout << colors[0] << "Description: " << colors[1] << description << colors[4] << std::endl;
     std::cout << colors[0] << "Software: " << colors[1] << software << colors[4] << std::endl;
+    std::cout << colors[0] << "Genre: " << colors[1] << genre << colors[4] << std::endl;
+    std::cout << colors[0] << "Copyright: " << colors[1] << copyright << colors[4] << std::endl;
 }
 
-void GUI::printGenericChunk(const std::string& key, const std::vector<char>& value) const {
+void GUI::printGenericChunk(const std::string& key, const std::vector<char>& value) {
     std::cout << "Chunk " << key << " data:" << std::endl;
     for (size_t i = 0; i < value.size(); ++i) {
-        char ch = value[i];
+        const char ch = value[i];
         std::cout << (std::isprint(ch) ? ch : '.');
         if ((i + 1) % 16 == 0 || i == value.size() - 1) {
             std::cout << std::endl;
