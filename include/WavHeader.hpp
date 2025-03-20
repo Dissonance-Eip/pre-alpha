@@ -44,15 +44,23 @@ public:
                     if (!file.read(reinterpret_cast<char*>(tempData.data()), subchunk2Size)) {
                         throw std::runtime_error("Failed to read audio data");
                     }
-                    audioData.clear();
-                    audioData.reserve(tempData.size());
-                    for (auto& sample : tempData) {
-                        audioData.push_back(sample);
-                    }
+                    audioData.assign(tempData.begin(), tempData.end());
                 }
                 break;
             }
-            file.seekg(chunkSize, std::ios::cur);
+            if (data == "LIST") {
+                std::vector<char> chunkData(chunkSize);
+                if (!file.read(chunkData.data(), chunkSize)) {
+                    throw std::runtime_error("Failed to read LIST chunk data");
+                }
+                otherChunks[data] = std::move(chunkData);
+            } else {
+                std::vector<char> chunkData(chunkSize);
+                if (!file.read(chunkData.data(), chunkSize)) {
+                    throw std::runtime_error("Failed to read chunk data");
+                }
+                otherChunks[data] = std::move(chunkData);
+            }
         }
     }
 

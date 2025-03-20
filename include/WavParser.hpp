@@ -15,6 +15,9 @@ public:
     [[nodiscard]] bool isValid() const { return valid; }
     void printMetadata() const;
     void printAudioData() const;
+    void printOtherChunks() const;
+    void printListChunk(const std::vector<char>& value) const;
+    void printGenericChunk(const std::string& key, const std::vector<char>& value) const;
 
 private:
     std::shared_ptr<WavHeader> header;
