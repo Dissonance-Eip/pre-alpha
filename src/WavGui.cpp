@@ -2,38 +2,38 @@
 // Created by noe on 16/03/2025.
 //
 
-#include "WavParser.hpp"
+#include "WavGUI.hpp"
 
 
-Parser::Parser(const std::string& filename) : header(std::make_shared<WavHeader>()), filename(filename) {
+GUI::GUI(const std::string& filename) : data(std::make_shared<Parser>()), filename(filename) {
     std::cout << colors[0]<< "Opening file: " << colors[3] <<filename << colors[4] << std::endl;
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
         throw std::runtime_error("Failed to open file: " + filename);
     }
     std::cout << colors[3] <<"File opened successfully" << colors[4] << std::endl;
-    header->readFromFile(file);
+    data->readFromFile(file);
     valid = true;
 }
 
-void Parser::printMetadata() const {
+void GUI::printMetadata() const {
     if (valid) {
-        std::cout << colors[0] << "Chunk size: " << colors[1] << header->getChunkSize() << colors[4] << std::endl;
-        std::cout << colors[0] << "Audio format: " << colors[1] << header->getAudioFormat() << colors[4] << std::endl;
-        std::cout << colors[0] << "Number of channels: " << colors[1] << header->getNumChannels() << colors[4] << std::endl;
-        std::cout << colors[0] << "Sample rate: " << colors[1] << header->getSampleRate() << colors[4] << std::endl;
-        std::cout << colors[0] << "Byte rate: " << colors[1] << header->getByteRate() << colors[4] << std::endl;
-        std::cout << colors[0] << "Block align: " << colors[1] << header->getBlockAlign() << colors[4] << std::endl;
-        std::cout << colors[0] << "Bits per sample: " << colors[1] << header->getBitsPerSample() << colors[4] << std::endl;
-        std::cout << colors[0] << "Data size: " << colors[1] << header->getSubchunk2Size() << colors[4] << std::endl;
+        std::cout << colors[0] << "Chunk size: " << colors[1] << data->getChunkSize() << colors[4] << std::endl;
+        std::cout << colors[0] << "Audio format: " << colors[1] << data->getAudioFormat() << colors[4] << std::endl;
+        std::cout << colors[0] << "Number of channels: " << colors[1] << data->getNumChannels() << colors[4] << std::endl;
+        std::cout << colors[0] << "Sample rate: " << colors[1] << data->getSampleRate() << colors[4] << std::endl;
+        std::cout << colors[0] << "Byte rate: " << colors[1] << data->getByteRate() << colors[4] << std::endl;
+        std::cout << colors[0] << "Block align: " << colors[1] << data->getBlockAlign() << colors[4] << std::endl;
+        std::cout << colors[0] << "Bits per sample: " << colors[1] << data->getBitsPerSample() << colors[4] << std::endl;
+        std::cout << colors[0] << "Data size: " << colors[1] << data->getSubchunk2Size() << colors[4] << std::endl;
     } else {
-        throw std::runtime_error("Failed to read file header");
+        throw std::runtime_error("Failed to read file data");
     }
 }
 
-void Parser::printAudioData() const {
+void GUI::printAudioData() const {
     if (valid) {
-        const auto& audioData = header->getAudioData();
+        const auto& audioData = data->getAudioData();
         std::ofstream outFile("../audio_data.bin", std::ios::binary);
         if (!outFile) {
             throw std::runtime_error("Failed to open output file");
@@ -46,13 +46,13 @@ void Parser::printAudioData() const {
     }
 }
 
-void Parser::printWaveform() const {
+void GUI::printWaveform() const {
     constexpr int defaultWidth = 200;
     constexpr int defaultHeight = 30;
     constexpr int width = defaultWidth;
     constexpr int height = defaultHeight;
     constexpr int mid = height / 2;
-    const auto audioData = header->getAudioData();
+    const auto audioData = data->getAudioData();
 
     std::vector waveform(height, std::string(width, ' '));
 
@@ -91,9 +91,9 @@ void Parser::printWaveform() const {
     }
 }
 
-void Parser::printOtherChunks() const {
+void GUI::printOtherChunks() const {
     if (valid) {
-        const auto& otherChunks = header->getOtherChunks();
+        const auto& otherChunks = data->getOtherChunks();
         for (const auto& [key, value] : otherChunks) {
             if (key == "LIST") {
                 printListChunk(value);
@@ -106,7 +106,7 @@ void Parser::printOtherChunks() const {
     }
 }
 
-void Parser::printListChunk(const std::vector<char>& value) const {
+void GUI::printListChunk(const std::vector<char>& value) const {
     std::cout << std::endl << colors[3] << "MetaData:" << colors[4] << std::endl;
     std::string title;
     std::string url;
@@ -154,7 +154,7 @@ void Parser::printListChunk(const std::vector<char>& value) const {
     std::cout << colors[0] << "Software: " << colors[1] << software << colors[4] << std::endl;
 }
 
-void Parser::printGenericChunk(const std::string& key, const std::vector<char>& value) const {
+void GUI::printGenericChunk(const std::string& key, const std::vector<char>& value) const {
     std::cout << "Chunk " << key << " data:" << std::endl;
     for (size_t i = 0; i < value.size(); ++i) {
         char ch = value[i];

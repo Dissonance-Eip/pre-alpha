@@ -7,8 +7,8 @@ include_directories(include)
 
 set(SOURCES
     src/main.cpp
-    src/WavParser.cpp
-        include/WavHeader.hpp
+        src/WavGui.cpp
+        include/WavParser.hpp
 )
 
 add_executable(dissonance.pre-alpha ${SOURCES})
