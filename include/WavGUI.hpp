@@ -15,6 +15,8 @@
 #include <vector>
 
 #include "WavParser.hpp"
+#include "Equalizer.hpp"
+#include "AudioPlayer.hpp"
 
 class GUI {
 public:
@@ -26,6 +28,16 @@ public:
     void printWaveform() const;
     void printListChunk(const std::vector<char>& value) const;
     static void printGenericChunk(const std::string& key, const std::vector<char>& value) ;
+    // Expose equalizer controls and playback
+    void setLowGainDb(float db);
+    void setMidGainDb(float db);
+    void setHighGainDb(float db);
+
+    // Start playback using internal AudioPlayer; this applies EQ to the audio buffer before playing.
+    bool startPlayback();
+    void pausePlayback();
+    void resumePlayback();
+    void stopPlayback();
 
 private:
     std::shared_ptr<Parser> data;
@@ -45,6 +57,10 @@ private:
     mutable std::string software;
     mutable std::string genre;
     mutable std::string copyright;
+
+    // Processing / playback
+    Equalizer eq{44100, 2};
+    AudioPlayer player;
 };
 
 #endif // WAVGUI_H

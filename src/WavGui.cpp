@@ -4,6 +4,16 @@
 
 #include "WavGUI.hpp"
 
+#ifdef _WIN32
+    #include <windows.h>
+    #include <mmsystem.h>
+    #include <conio.h>
+    #include <csignal>
+#endif
+
+#include <thread>
+#include <chrono>
+
 
 GUI::GUI(const std::string& filename) : data(std::make_shared<Parser>()), filename(filename) {
     std::cout << colors[0]<< "Opening file: " << colors[3] <<filename << colors[4] << std::endl;
@@ -13,6 +23,8 @@ GUI::GUI(const std::string& filename) : data(std::make_shared<Parser>()), filena
     }
     std::cout << colors[3] <<"File opened successfully" << colors[4] << std::endl;
     data->readFromFile(file);
+    // Reinitialize EQ to match file sample rate and channels
+    eq = Equalizer(data->getSampleRate(), data->getNumChannels());
     valid = true;
 }
 
@@ -165,3 +177,77 @@ void GUI::printGenericChunk(const std::string& key, const std::vector<char>& val
     }
     std::cout << std::endl;
 }
+
+// EQ control
+void GUI::setLowGainDb(float db) { eq.setLowGainDb(db); }
+void GUI::setMidGainDb(float db) { eq.setMidGainDb(db); }
+void GUI::setHighGainDb(float db) { eq.setHighGainDb(db); }
+
+// Playback control: apply EQ and play via AudioPlayer. Handles Space to pause/resume and Enter to raise SIGINT.
+bool GUI::startPlayback() {
+#ifdef _WIN32
+    if (!valid) return false;
+    const auto& audio = data->getAudioData();
+    const unsigned sampleRate = data->getSampleRate();
+    const unsigned channels = data->getNumChannels();
+
+    std::vector<int16_t> processed;
+    eq.process(audio, processed);
+
+    // Start playback using alias "mywav" so we can poll MCI status
+    if (!player.playFromBuffer(processed, sampleRate, channels, "mywav")) {
+        std::cerr << "Failed to start playback via AudioPlayer." << std::endl;
+        return false;
+    }
+
+    std::cout << colors[1] << "Playing... (Space = pause/resume, Enter = send Ctrl+C)" << colors[4] << std::endl;
+
+    bool paused = false;
+    char statusBuf[128] = {0};
+
+    while (true) {
+        // Query MCI playback status
+        if (mciSendStringA("status mywav mode", statusBuf, sizeof(statusBuf), nullptr) != 0) {
+            break;
+        }
+        std::string status(statusBuf);
+        while (!status.empty() && std::isspace(static_cast<unsigned char>(status.back()))) status.pop_back();
+
+        if (status == "stopped" || status == "not ready" || status == "closed") {
+            break;
+        }
+
+        if (_kbhit()) {
+            int ch = _getch();
+            if (ch == ' ') {
+                if (paused) {
+                    player.resume();
+                    paused = false;
+                    std::cout << colors[3] << "Resumed" << colors[4] << std::endl;
+                } else {
+                    player.pause();
+                    paused = true;
+                    std::cout << colors[2] << "Paused" << colors[4] << std::endl;
+                }
+            } else if (ch == 13) {
+                std::cout << "Enter pressed: raising SIGINT (Ctrl+C)" << std::endl;
+                player.stop();
+                std::raise(SIGINT);
+                break;
+            }
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    player.stop();
+    return true;
+#else
+    (void)audio; (void)processed;
+    std::cout << "Playback not implemented on this platform." << std::endl;
+    return false;
+#endif
+}
+
+void GUI::pausePlayback() { player.pause(); }
+void GUI::resumePlayback() { player.resume(); }
+void GUI::stopPlayback() { player.stop(); }

@@ -8,9 +8,15 @@ include_directories(include)
 set(SOURCES
     src/main.cpp
     src/WavGui.cpp
-    include/WavParser.hpp
+    src/Equalizer.cpp
+    src/AudioPlayer.cpp
 )
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 add_executable(dissonance.pre-alpha ${SOURCES})
+
+# Link Windows multimedia library when building on Windows to allow PlaySound
+if (WIN32)
+    target_link_libraries(dissonance.pre-alpha PRIVATE winmm)
+endif()
